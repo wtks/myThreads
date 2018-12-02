@@ -44,13 +44,12 @@ void remove_thread_from_list(mythread_t t) {
 }
 
 uint stack_size = STACK_SIZE;
-bool running = false;
-
 struct context *sch_context;
 
 mythread_t new_thread(void (*fun)(int), int arg) {
     mythread_t t = malloc(sizeof(mythread_t));
-    t->finished = false;
+    t->state = TH_READY;
+    t->chan = NULL;
     t->stack = valloc(stack_size);
     t->context = new_context(t->stack + (stack_size / sizeof(uint)), fun, arg);
     add_thread_to_list(t);
@@ -58,7 +57,7 @@ mythread_t new_thread(void (*fun)(int), int arg) {
 }
 
 void th_exit() {
-    th_list_current->thread->finished = true;
+    th_list_current->thread->state = TH_FINISHED;
     yield();
 }
 
@@ -69,12 +68,15 @@ void th_destory(mythread_t t) {
 
 void scheduler() {
     while (th_list_current != NULL) {
-        swtch(&sch_context, th_list_current->thread->context);
+
+        if (th_list_current->thread->state == TH_READY) {
+            swtch(&sch_context, th_list_current->thread->context);
+        }
 
         th_list_node_t *tmp = th_list_current;
         th_list_current = th_list_current->next;
 
-        if (tmp->thread->finished) {
+        if (tmp->thread->state == TH_FINISHED) {
             // 終了処理
             th_destory(tmp->thread);
             remove_thread_from_list(tmp->thread);
@@ -91,14 +93,35 @@ void yield() {
 }
 
 void start_threads() {
-    if (running) {
-        return;
-    }
-    if (th_list_first == NULL) {
+    if (th_list_first == NULL || th_list_current != NULL) {
         return;
     }
     th_list_current = th_list_first;
     scheduler();
+}
+
+void twait(void *a) {
+    th_list_current->thread->state = TH_SLEEP;
+    th_list_current->thread->chan = a;
+    yield();
+}
+
+void notify(mythread_t th, void *a) {
+    if (th->chan == a) {
+        th->chan = NULL;
+        th->state = TH_READY;
+    }
+}
+
+void notify_all(void *a) {
+    th_list_node_t *node = th_list_first;
+    while (node != NULL) {
+        if (node->thread->chan == a) {
+            node->thread->chan = NULL;
+            node->thread->state = TH_READY;
+        }
+        node = node->next;
+    }
 }
 
 void set_max_stack_size(uint size) {
