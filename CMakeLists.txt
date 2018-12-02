@@ -7,3 +7,6 @@ add_library(myThreads STATIC swtch.S mythread.c context.c)
 
 add_executable(thtest1 thtest1.c)
 target_link_libraries(thtest1 myThreads)
+
+add_executable(thtest2 thtest2.c)
+target_link_libraries(thtest2 myThreads)

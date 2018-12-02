@@ -1,14 +1,12 @@
 #ifndef MYTHREADS_MYTHREAD_H
 #define MYTHREADS_MYTHREAD_H
 
+#include <stdbool.h>
 #include "context.h"
 
 typedef struct mythread {
-    // thread entry point
-    void (*fun)(int);
-
-    // thread arg
-    int arg;
+    // whether finished
+    bool finished;
     // stack
     uint *stack;
     // context
@@ -18,6 +16,8 @@ typedef struct mythread {
 mythread_t new_thread(void (*fun)(int), int arg);
 
 void start_threads();
+
+void th_exit();
 
 void yield();
 
