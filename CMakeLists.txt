@@ -13,3 +13,6 @@ target_link_libraries(thtest2 myThreads)
 
 add_executable(thtest3 thtest3.c)
 target_link_libraries(thtest3 myThreads)
+
+add_executable(thtest4 thtest4.c)
+target_link_libraries(thtest4 myThreads)

@@ -19,6 +19,8 @@ mythread_t new_thread(void (*)(int), int);
 
 void start_threads();
 
+void start_threads_with_preemption();
+
 void th_exit();
 
 void yield();
