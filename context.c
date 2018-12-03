@@ -5,7 +5,7 @@
 
 struct context *new_context(uint *sp, void (*fun)(int), int arg) {
     push(sp, arg);
-    push(sp, (uint)th_exit);
+    push(sp, (uint)th_exit); // return先をth_exit先頭に
     sp -= sizeof(struct context) / sizeof(uint);
     struct context *ctx = (struct context *)sp;
     ctx->eip = (uint)fun;

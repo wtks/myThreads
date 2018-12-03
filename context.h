@@ -14,7 +14,5 @@ struct context {
 struct context *new_context(uint *, void (*)(int), int);
 
 #define STACK_SIZE 4096
-#define STACK_DEPTH (STACK_SIZE / sizeof(uint))
-
 
 #endif //MYTHREADS_CONTEXT_H

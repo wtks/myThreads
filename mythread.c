@@ -95,10 +95,6 @@ static void scheduler() {
     }
 }
 
-void yield() {
-    swtch(&(th_list_current->thread->context), sch_context);
-}
-
 void start_threads() {
     if (th_list_first == NULL || th_list_current != NULL) {
         return;
@@ -113,7 +109,7 @@ static void sig_handler(int signum) {
     }
 }
 
-void start_threads_with_preemption() {
+void start_threads_with_preemption(uint timeout) {
     if (th_list_first == NULL || th_list_current != NULL) {
         return;
     }
@@ -131,7 +127,7 @@ void start_threads_with_preemption() {
 
     // 割り込みタイマ設定
     timerval.it_value.tv_sec = 0;
-    timerval.it_value.tv_usec = 10000;
+    timerval.it_value.tv_usec = timeout*1000;
     timerval.it_interval = timerval.it_value;
     if (setitimer(ITIMER_REAL, &timerval, NULL) != 0) {
         perror("setitimer error");
@@ -154,6 +150,10 @@ void start_threads_with_preemption() {
         perror("sigaction error");
         exit(1);
     }
+}
+
+void yield() {
+    swtch(&(th_list_current->thread->context), sch_context);
 }
 
 void twait(void *a) {
